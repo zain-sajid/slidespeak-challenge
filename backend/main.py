@@ -1,9 +1,30 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
-import os
+from pydantic_settings import BaseSettings, SettingsConfigDict
 import uuid
 import httpx
+import boto3
 
+
+class Settings(BaseSettings):
+    aws_access_key_id: str
+    aws_secret_access_key: str
+    aws_region: str
+    aws_endpoint_url: str
+    aws_s3_bucket: str
+    model_config = SettingsConfigDict(env_file=".env")
+
+
+settings = Settings()
 app = FastAPI()
+
+
+s3_client = boto3.client(
+    "s3",
+    region_name=settings.aws_region,
+    endpoint_url=settings.aws_endpoint_url,
+    aws_access_key_id=settings.aws_access_key_id,
+    aws_secret_access_key=settings.aws_secret_access_key,
+)
 
 
 @app.get("/")
@@ -15,12 +36,8 @@ async def root():
 async def convert_pptx_to_pdf(file: UploadFile = File(...)):
     if not file.filename.endswith(".pptx"):
         raise HTTPException(status_code=400, detail="Only .pptx files are supported")
-
-    tmp_dir = f"tmp/{uuid.uuid4()}"
-    os.makedirs(tmp_dir, exist_ok=True)
-    output_path = os.path.join(tmp_dir, "output.pdf")
-
     try:
+        key = f"{uuid.uuid4()}.pdf"
         content = await file.read()
 
         files = {
@@ -34,10 +51,25 @@ async def convert_pptx_to_pdf(file: UploadFile = File(...)):
         if response.status_code != 200:
             raise HTTPException(status_code=500, detail="Conversion failed")
 
-        with open(output_path, "wb") as out:
-            out.write(response.content)
+        pdfContent = response.content
 
-        return {"message": "PPTX converted to PDF"}
+        s3_client.put_object(
+            Bucket=settings.aws_s3_bucket,
+            Key=key,
+            Body=pdfContent,
+            ContentType="application/pdf",
+        )
+
+        url = s3_client.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": settings.aws_s3_bucket,
+                "Key": key,
+            },
+            ExpiresIn=3600,
+        )
+
+        return {"message": "PPTX converted to PDF", "url": url}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to process file: {str(e)}")
