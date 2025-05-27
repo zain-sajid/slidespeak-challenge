@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 import uuid
 import httpx
 import boto3
+from botocore.exceptions import BotoCoreError, NoCredentialsError
 
 
 class Settings(BaseSettings):
@@ -44,10 +45,17 @@ async def root():
 async def convert_pptx_to_pdf(file: UploadFile = File(...)):
     if not file.filename.endswith(".pptx"):
         raise HTTPException(status_code=400, detail="Only .pptx files are supported")
-    try:
-        key = f"{uuid.uuid4()}.pdf"
-        content = await file.read()
 
+    key = f"{uuid.uuid4()}.pdf"
+
+    try:
+        content = await file.read()
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error reading the uploaded file: {str(e)}"
+        )
+
+    try:
         files = {
             "file": (file.filename, content, file.content_type),
             "convert-to": (None, "pdf"),
@@ -55,29 +63,34 @@ async def convert_pptx_to_pdf(file: UploadFile = File(...)):
 
         async with httpx.AsyncClient() as client:
             response = await client.post("http://127.0.0.1:2004/request", files=files)
+    except httpx.RequestError as e:
+        raise HTTPException(
+            status_code=502, detail=f"Conversion service error: {str(e)}"
+        )
 
-        if response.status_code != 200:
-            raise HTTPException(status_code=500, detail="Conversion failed")
+    if response.status_code != 200:
+        raise HTTPException(status_code=500, detail="Failed to convert file")
 
+    try:
         pdfContent = response.content
-
         s3_client.put_object(
             Bucket=settings.aws_s3_bucket,
             Key=key,
             Body=pdfContent,
             ContentType="application/pdf",
         )
+    except (BotoCoreError, NoCredentialsError) as e:
+        raise HTTPException(status_code=500, detail=f"Failed to upload PDF: {str(e)}")
 
+    try:
         url = s3_client.generate_presigned_url(
             "get_object",
-            Params={
-                "Bucket": settings.aws_s3_bucket,
-                "Key": key,
-            },
+            Params={"Bucket": settings.aws_s3_bucket, "Key": key},
             ExpiresIn=3600,
         )
-
-        return {"message": "PPTX converted to PDF", "url": url}
-
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to process file: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to generate presigned URL: {str(e)}"
+        )
+
+    return {"message": "PPTX converted to PDF", "url": url}
