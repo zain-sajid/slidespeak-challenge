@@ -4,13 +4,25 @@ import { FC, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import UploadIcon from '@/icons/UploadIcon';
 
-type ChooseFileStepProps = {};
+type ChooseFileStepProps = {
+  onChooseFile: (file: File) => void;
+};
 
-export const ChooseFileStep: FC<ChooseFileStepProps> = () => {
+export const ChooseFileStep: FC<ChooseFileStepProps> = ({ onChooseFile }) => {
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    console.log(acceptedFiles);
+    if (acceptedFiles.length !== 1) {
+      return;
+    }
+    onChooseFile(acceptedFiles[0]);
   }, []);
-  const { getRootProps, getInputProps } = useDropzone({ onDrop });
+
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    accept: {
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+        ['.pptx'],
+    },
+  });
 
   return (
     <div
