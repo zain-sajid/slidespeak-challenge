@@ -16,8 +16,8 @@ export const SuccessCircleIcon = ({ className }: SuccessCircleIconProps) => (
     <path
       d="M16 9L10.5 14.5L8 12"
       stroke="#039855"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
