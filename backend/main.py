@@ -1,4 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import uuid
 import httpx
@@ -16,6 +17,13 @@ class Settings(BaseSettings):
 
 settings = Settings()
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_methods=["POST", "GET"],
+    allow_headers=["Content-Type"],
+)
 
 
 s3_client = boto3.client(
