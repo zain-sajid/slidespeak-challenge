@@ -2,7 +2,8 @@ import './globals.css';
 
 export const metadata = {
   title: 'PowerPoint optimizer - SlideSpeak',
-  description: 'Reduce the size of your PowerPoint file without losing quality.',
+  description:
+    'Reduce the size of your PowerPoint file without losing quality.',
 };
 
 const RootLayout = async ({ children }: { children: React.ReactNode }) => (
