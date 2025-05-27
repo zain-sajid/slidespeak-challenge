@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { formatFileSize } from '@/utils/file-size';
 import { LoadingIndicatorIcon } from '@/icons/LoadingIndicatorIcon';
-import { LoadingCircleIcon } from '@/icons/LoadingCircle';
+import { LoadingCircleIcon } from '@/icons/LoadingCircleIcon';
 
 type ConvertFileStepProps = {
   file: File | null;
@@ -96,7 +96,7 @@ export const ConvertFileStep: FC<ConvertFileStepProps> = ({
         <Button
           size="lg"
           variant="outline"
-          className="w-full font-semibold text-base"
+          className="w-full font-semibold"
           onClick={onCancel}
           disabled={isConverting}
         >
@@ -104,7 +104,7 @@ export const ConvertFileStep: FC<ConvertFileStepProps> = ({
         </Button>
         <Button
           size="lg"
-          className="w-full font-semibold text-base"
+          className="w-full font-semibold"
           onClick={onCompress}
           disabled={isConverting}
         >

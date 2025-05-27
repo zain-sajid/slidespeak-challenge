@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import { ChooseFileStep } from '@/components/ChooseFileStep';
 import { ConvertFileStep } from '@/components/ConvertFileStep';
+import { DownloadFileStep } from '@/components/DownloadFileStep';
 
 export type Step = 'CHOOSE_FILE' | 'CONVERT' | 'DOWNLOAD';
 
 export const PowerPointToPdfConverter = () => {
-  const [currentStep, setCurrentStep] = useState<Step>('CHOOSE_FILE');
+  const [currentStep, setCurrentStep] = useState<Step>('DOWNLOAD');
   const [file, setFile] = useState<File | null>(null);
 
   const onChooseFile = (file: File) => {
@@ -25,5 +26,7 @@ export const PowerPointToPdfConverter = () => {
       return <ChooseFileStep onChooseFile={onChooseFile} />;
     case 'CONVERT':
       return <ConvertFileStep file={file} onCancel={onCancel} />;
+    case 'DOWNLOAD':
+      return <DownloadFileStep onCancel={onCancel} />;
   }
 };
