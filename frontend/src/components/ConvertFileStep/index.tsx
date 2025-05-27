@@ -5,11 +5,17 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { formatFileSize } from '@/utils/file-size';
 import { LoadingIndicatorIcon } from '@/icons/LoadingIndicatorIcon';
 import { LoadingCircleIcon } from '@/icons/LoadingCircleIcon';
+import axios from 'axios';
 
 type ConvertFileStepProps = {
   file: File | null;
-  onConvert: () => void;
+  onConvert: (url: string) => void;
   onCancel: () => void;
+};
+
+type UploadResponse = {
+  message: string;
+  url: string | null;
 };
 
 const options = [
@@ -27,14 +33,24 @@ export const ConvertFileStep: FC<ConvertFileStepProps> = ({
 }) => {
   const [isConverting, setIsConverting] = useState(false);
 
-  const onCompress = () => {
+  const onCompress = async () => {
     setIsConverting(true);
 
-    // Mock converting
-    setTimeout(() => {
-      setIsConverting(false);
-      onConvert();
-    }, 3000);
+    const formData = new FormData();
+    if (!file) {
+      return;
+    }
+    formData.append('file', file);
+
+    const response = await axios.post<UploadResponse>(
+      'http://127.0.0.1:8000/convert',
+      formData
+    );
+
+    setIsConverting(false);
+    if (response.data.url) {
+      onConvert(response.data.url);
+    }
   };
 
   if (!file) {

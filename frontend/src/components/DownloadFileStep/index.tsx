@@ -4,10 +4,14 @@ import { PdfIcon } from '@/icons/PdfIcon';
 import { SuccessCircleIcon } from '@/icons/SuccessCircleIcon';
 
 type DownloadFileStepProps = {
+  onDownload: () => void;
   onCancel: () => void;
 };
 
-export const DownloadFileStep: FC<DownloadFileStepProps> = ({ onCancel }) => {
+export const DownloadFileStep: FC<DownloadFileStepProps> = ({
+  onDownload,
+  onCancel,
+}) => {
   return (
     <div className="p-6 flex flex-col gap-4 shadow-md rounded-2xl">
       <div className="flex flex-col gap-3">
@@ -31,7 +35,7 @@ export const DownloadFileStep: FC<DownloadFileStepProps> = ({ onCancel }) => {
         >
           Convert another
         </Button>
-        <Button size="lg" className="w-full font-semibold">
+        <Button size="lg" className="w-full font-semibold" onClick={onDownload}>
           Download
         </Button>
       </div>

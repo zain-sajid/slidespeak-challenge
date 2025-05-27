@@ -8,16 +8,24 @@ import { DownloadFileStep } from '@/components/DownloadFileStep';
 export type Step = 'CHOOSE_FILE' | 'CONVERT' | 'DOWNLOAD';
 
 export const PowerPointToPdfConverter = () => {
-  const [currentStep, setCurrentStep] = useState<Step>('DOWNLOAD');
+  const [currentStep, setCurrentStep] = useState<Step>('CHOOSE_FILE');
   const [file, setFile] = useState<File | null>(null);
+  const [url, setUrl] = useState<string | null>(null);
 
   const onChooseFile = (file: File) => {
     setFile(file);
     setCurrentStep('CONVERT');
   };
 
-  const onConvert = () => {
+  const onConvert = (url: string) => {
+    setUrl(url);
     setCurrentStep('DOWNLOAD');
+  };
+
+  const onDownload = () => {
+    if (url) {
+      window.open(url, '_blank');
+    }
   };
 
   const onCancel = () => {
@@ -30,9 +38,13 @@ export const PowerPointToPdfConverter = () => {
       return <ChooseFileStep onChooseFile={onChooseFile} />;
     case 'CONVERT':
       return (
-        <ConvertFileStep file={file} onCancel={onCancel} onConvert={onConvert} />
+        <ConvertFileStep
+          file={file}
+          onCancel={onCancel}
+          onConvert={onConvert}
+        />
       );
     case 'DOWNLOAD':
-      return <DownloadFileStep onCancel={onCancel} />;
+      return <DownloadFileStep onCancel={onCancel} onDownload={onDownload} />;
   }
 };
