@@ -1,8 +1,8 @@
-import { PowerPointToPdfConverter } from '@/components/PowerPointToPdfConverter';
+import { ChooseFileStep } from '@/components/ChooseFileStep';
 
 const Home = async () => (
   <main className="w-full max-w-[420px]">
-    <PowerPointToPdfConverter />
+    <ChooseFileStep />
   </main>
 );
 

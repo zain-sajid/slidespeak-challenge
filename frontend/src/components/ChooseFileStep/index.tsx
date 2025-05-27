@@ -1,3 +1,5 @@
+'use client';
+
 import { FC, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import UploadIcon from '@/icons/UploadIcon';
@@ -5,7 +7,10 @@ import UploadIcon from '@/icons/UploadIcon';
 type ChooseFileStepProps = {};
 
 export const ChooseFileStep: FC<ChooseFileStepProps> = () => {
-  const { getRootProps, getInputProps } = useDropzone({});
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    console.log(acceptedFiles);
+  }, []);
+  const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
   return (
     <div
