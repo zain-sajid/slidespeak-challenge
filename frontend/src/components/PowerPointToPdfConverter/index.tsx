@@ -16,6 +16,10 @@ export const PowerPointToPdfConverter = () => {
     setCurrentStep('CONVERT');
   };
 
+  const onConvert = () => {
+    setCurrentStep('DOWNLOAD');
+  };
+
   const onCancel = () => {
     setFile(null);
     setCurrentStep('CHOOSE_FILE');
@@ -25,7 +29,9 @@ export const PowerPointToPdfConverter = () => {
     case 'CHOOSE_FILE':
       return <ChooseFileStep onChooseFile={onChooseFile} />;
     case 'CONVERT':
-      return <ConvertFileStep file={file} onCancel={onCancel} />;
+      return (
+        <ConvertFileStep file={file} onCancel={onCancel} onConvert={onConvert} />
+      );
     case 'DOWNLOAD':
       return <DownloadFileStep onCancel={onCancel} />;
   }

@@ -8,6 +8,7 @@ import { LoadingCircleIcon } from '@/icons/LoadingCircleIcon';
 
 type ConvertFileStepProps = {
   file: File | null;
+  onConvert: () => void;
   onCancel: () => void;
 };
 
@@ -21,6 +22,7 @@ const options = [
 
 export const ConvertFileStep: FC<ConvertFileStepProps> = ({
   file,
+  onConvert,
   onCancel,
 }) => {
   const [isConverting, setIsConverting] = useState(false);
@@ -31,6 +33,7 @@ export const ConvertFileStep: FC<ConvertFileStepProps> = ({
     // Mock converting
     setTimeout(() => {
       setIsConverting(false);
+      onConvert();
     }, 3000);
   };
 
