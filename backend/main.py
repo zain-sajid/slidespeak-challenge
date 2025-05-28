@@ -30,7 +30,9 @@ async def convert_pptx_to_pdf(file: UploadFile = File(...)):
     try:
         content = await file.read()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error reading file: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error reading the uploaded file: {str(e)}"
+        )
 
     # Start Celery task
     task = convert_and_upload.delay(content, file.filename, file.content_type)
@@ -41,9 +43,20 @@ async def convert_pptx_to_pdf(file: UploadFile = File(...)):
 @app.get("/task/{task_id}")
 def get_task_result(task_id: str):
     result = AsyncResult(task_id, app=celery_app)
+    if not result:
+        raise HTTPException(status_code=404, detail="Task not found")
     if result.ready():
         return {"status": result.status, "result": result.result}
     return {"status": result.status}
+
+
+@app.delete("/cancel-task/{task_id}")
+def cancel_task(task_id: str):
+    result = AsyncResult(task_id, app=celery_app)
+    if not result:
+        raise HTTPException(status_code=404, detail="Task not found")
+    result.revoke(terminate=True, signal="SIGKILL")
+    return {"status": "CANCELLED", "task_id": task_id}
 
 
 @app.post("/convert")
@@ -70,7 +83,7 @@ async def convert_pptx_to_pdf(file: UploadFile = File(...)):
             response = await client.post("http://127.0.0.1:2004/request", files=files)
     except httpx.RequestError as e:
         raise HTTPException(
-            status_code=502, detail=f"Conversion service error: {str(e)}"
+            status_code=502, detail=f"Error converting the file: {str(e)}"
         )
 
     if response.status_code != 200:
