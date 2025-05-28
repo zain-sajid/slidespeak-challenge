@@ -1,4 +1,5 @@
 import './globals.css';
+import { Toaster } from '@/components/ui/toaster';
 
 export const metadata = {
   title: 'PowerPoint optimizer - SlideSpeak',
@@ -8,7 +9,10 @@ export const metadata = {
 
 const RootLayout = async ({ children }: { children: React.ReactNode }) => (
   <html lang="en">
-    <body>{children}</body>
+    <body>
+      {children}
+      <Toaster />
+    </body>
   </html>
 );
 

@@ -7,6 +7,8 @@ import { LoadingIndicatorIcon } from '@/icons/LoadingIndicatorIcon';
 import { LoadingCircleIcon } from '@/icons/LoadingCircleIcon';
 import axios from 'axios';
 import { useInterval } from 'usehooks-ts';
+import { useToast } from '@/hooks/use-toast';
+import { CircleX } from 'lucide-react';
 
 type ConvertFileStepProps = {
   file: File | null;
@@ -19,7 +21,7 @@ type UploadResponse = {
   task_id: string;
 };
 
-type TaskStatus = 'PENDING' | 'SUCCESS' | 'FAILURE';
+type TaskStatus = 'PENDING' | 'SUCCESS' | 'FAILURE' | 'REVOKED';
 
 type TaskResponse = {
   status: TaskStatus;
@@ -44,46 +46,87 @@ export const ConvertFileStep: FC<ConvertFileStepProps> = ({
   const [status, setStatus] = useState<ConvertStatus | null>(null);
   const [taskId, setTaskId] = useState<string | null>(null);
 
+  const { toast } = useToast();
+
   const isConverting = status === 'PENDING' || status === 'UPLOADING';
 
   useInterval(
-    async () => {
-      const response = await axios.get<TaskResponse>(
-        `http://127.0.0.1:8000/task/${taskId}`
-      );
+    () => {
+      axios
+        .get<TaskResponse>(`http://127.0.0.1:8000/task/${taskId}`)
+        .then((response) => {
+          setStatus(response.data.status);
 
-      setStatus(response.data.status);
-
-      if (response.data.status === 'SUCCESS') {
-        onConvert(response.data.result);
-      } else if (response.data.status === 'FAILURE') {
-        console.error(response.data.result);
-      }
+          if (response.data.status === 'SUCCESS') {
+            onConvert(response.data.result);
+          } else if (response.data.status === 'FAILURE') {
+            toast({
+              title: (
+                <span className="flex items-center gap-1">
+                  <CircleX className="fill-red-500 text-white size-5" />
+                  <span>Uh oh! Something went wrong.</span>
+                </span>
+              ),
+              description: 'Failed to convert your file.',
+            });
+          }
+        })
+        .catch((error) => {
+          toast({
+            title: (
+              <span className="flex items-center gap-1">
+                <CircleX className="fill-red-500 text-white size-5" />
+                <span>Uh oh! Something went wrong.</span>
+              </span>
+            ),
+            description:
+              error.response?.data?.detail ??
+              'There was a problem converting your file.',
+          });
+          setStatus(null);
+        });
     },
     status === 'PENDING' && taskId ? 2000 : null
   );
 
-  const onCompress = async () => {
+  const onCompress = () => {
+    if (!file) {
+      toast({
+        title: 'No file selected',
+        description: 'Please select a file to convert',
+      });
+      return;
+    }
+
     setStatus('UPLOADING');
 
     const formData = new FormData();
-    if (!file) {
-      return;
-    }
     formData.append('file', file);
 
-    const response = await axios.post<UploadResponse>(
-      'http://127.0.0.1:8000/convert-task',
-      formData,
-      {
+    axios
+      .post<UploadResponse>('http://127.0.0.1:8000/convert-task', formData, {
         onUploadProgress: (progressEvent) => {
           console.log(progressEvent);
         },
-      }
-    );
-
-    setStatus('PENDING');
-    setTaskId(response.data.task_id);
+      })
+      .then((response) => {
+        setStatus('PENDING');
+        setTaskId(response.data.task_id);
+      })
+      .catch((error) => {
+        toast({
+          title: (
+            <span className="flex items-center gap-1">
+              <CircleX className="fill-red-500 text-white size-5" />
+              <span>Uh oh! Something went wrong.</span>
+            </span>
+          ),
+          description:
+            error.response?.data?.detail ??
+            'There was a problem uploading your file.',
+        });
+        setStatus(null);
+      });
   };
 
   if (!file) {
