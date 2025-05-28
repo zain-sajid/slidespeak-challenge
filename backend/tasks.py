@@ -14,7 +14,7 @@ def add(x, y):
     return x + y
 
 
-@celery_app.task(time_limit=100)
+@celery_app.task(time_limit=150)
 def convert_and_upload(file_content: bytes, filename: str, content_type: str):
     key = f"{uuid.uuid4()}.pdf"
 
@@ -24,9 +24,12 @@ def convert_and_upload(file_content: bytes, filename: str, content_type: str):
     }
 
     try:
-        response = httpx.post("http://127.0.0.1:2004/request", files=files)
+        timeout = httpx.Timeout(100)
+        response = httpx.post(
+            "http://127.0.0.1:2004/request", files=files, timeout=timeout
+        )
     except httpx.RequestError as e:
-        raise Exception(f"Conversion service error: {str(e)}")
+        raise Exception(f"Error converting the file: {str(e)}")
 
     if response.status_code != 200:
         raise Exception("Failed to convert file")
