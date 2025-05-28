@@ -6,6 +6,7 @@ import { formatFileSize } from '@/utils/file-size';
 import { LoadingIndicatorIcon } from '@/icons/LoadingIndicatorIcon';
 import { LoadingCircleIcon } from '@/icons/LoadingCircleIcon';
 import axios from 'axios';
+import { useInterval } from 'usehooks-ts';
 
 type ConvertFileStepProps = {
   file: File | null;
@@ -15,8 +16,17 @@ type ConvertFileStepProps = {
 
 type UploadResponse = {
   message: string;
-  url: string | null;
+  task_id: string;
 };
+
+type TaskStatus = 'PENDING' | 'SUCCESS' | 'FAILURE';
+
+type TaskResponse = {
+  status: TaskStatus;
+  result: string;
+};
+
+type ConvertStatus = 'UPLOADING' | TaskStatus;
 
 const options = [
   {
@@ -31,10 +41,30 @@ export const ConvertFileStep: FC<ConvertFileStepProps> = ({
   onConvert,
   onCancel,
 }) => {
-  const [isConverting, setIsConverting] = useState(false);
+  const [status, setStatus] = useState<ConvertStatus | null>(null);
+  const [taskId, setTaskId] = useState<string | null>(null);
+
+  const isConverting = status === 'PENDING' || status === 'UPLOADING';
+
+  useInterval(
+    async () => {
+      const response = await axios.get<TaskResponse>(
+        `http://127.0.0.1:8000/task/${taskId}`
+      );
+
+      setStatus(response.data.status);
+
+      if (response.data.status === 'SUCCESS') {
+        onConvert(response.data.result);
+      } else if (response.data.status === 'FAILURE') {
+        console.error(response.data.result);
+      }
+    },
+    status === 'PENDING' && taskId ? 2000 : null
+  );
 
   const onCompress = async () => {
-    setIsConverting(true);
+    setStatus('UPLOADING');
 
     const formData = new FormData();
     if (!file) {
@@ -43,14 +73,17 @@ export const ConvertFileStep: FC<ConvertFileStepProps> = ({
     formData.append('file', file);
 
     const response = await axios.post<UploadResponse>(
-      'http://127.0.0.1:8000/convert',
-      formData
+      'http://127.0.0.1:8000/convert-task',
+      formData,
+      {
+        onUploadProgress: (progressEvent) => {
+          console.log(progressEvent);
+        },
+      }
     );
 
-    setIsConverting(false);
-    if (response.data.url) {
-      onConvert(response.data.url);
-    }
+    setStatus('PENDING');
+    setTaskId(response.data.task_id);
   };
 
   if (!file) {
