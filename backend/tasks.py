@@ -14,7 +14,7 @@ def add(x, y):
     return x + y
 
 
-@celery_app.task
+@celery_app.task(time_limit=100)
 def convert_and_upload(file_content: bytes, filename: str, content_type: str):
     key = f"{uuid.uuid4()}.pdf"
 
