@@ -1,41 +1,19 @@
+import axios from 'axios';
 import { FC, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { formatFileSize } from '@/utils/file-size';
 import { LoadingIndicatorIcon } from '@/icons/LoadingIndicatorIcon';
 import { LoadingCircleIcon } from '@/icons/LoadingCircleIcon';
-import axios from 'axios';
 import { useInterval } from 'usehooks-ts';
 import { useToast } from '@/hooks/use-toast';
+import { ConvertStatus, TaskResponse, UploadResponse } from '@/types';
+import { CompressionOptionsRadioGroup } from '@/components/ConvertFileStep/CompressionOptionsRadioGroup';
 
 type ConvertFileStepProps = {
   file: File | null;
   onConvert: (url: string) => void;
   onCancel: () => void;
 };
-
-type UploadResponse = {
-  message: string;
-  task_id: string;
-};
-
-type TaskStatus = 'PENDING' | 'SUCCESS' | 'FAILURE' | 'REVOKED';
-
-type TaskResponse = {
-  status: TaskStatus;
-  result: string;
-};
-
-type ConvertStatus = 'UPLOADING' | TaskStatus;
-
-const options = [
-  {
-    value: 'high-compression',
-    label: 'High Compression',
-    description: 'Smallest file size, standard quality.',
-  },
-];
 
 export const ConvertFileStep: FC<ConvertFileStepProps> = ({
   file,
@@ -44,12 +22,13 @@ export const ConvertFileStep: FC<ConvertFileStepProps> = ({
 }) => {
   const [status, setStatus] = useState<ConvertStatus | null>(null);
   const [taskId, setTaskId] = useState<string | null>(null);
-
-  const { toast } = useToast();
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   const isConverting = status === 'PENDING' || status === 'UPLOADING';
 
-  const onCompress = () => {
+  const { toast } = useToast();
+
+  const handleConvert = () => {
     if (!file) {
       toast({
         title: 'No file selected',
@@ -65,11 +44,15 @@ export const ConvertFileStep: FC<ConvertFileStepProps> = ({
     formData.append('file', file);
 
     axios
-      .post<UploadResponse>('http://127.0.0.1:8000/convert-task', formData, {
-        onUploadProgress: (progressEvent) => {
-          console.log(progressEvent);
-        },
-      })
+      .post<UploadResponse>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/convert-task`,
+        formData,
+        {
+          onUploadProgress: (progressEvent) => {
+            setUploadProgress(Math.round((progressEvent.progress ?? 0) * 100));
+          },
+        }
+      )
       .then((response) => {
         setStatus('PENDING');
         setTaskId(response.data.task_id);
@@ -90,7 +73,9 @@ export const ConvertFileStep: FC<ConvertFileStepProps> = ({
   useInterval(
     () => {
       axios
-        .get<TaskResponse>(`http://127.0.0.1:8000/task/${taskId}`)
+        .get<TaskResponse>(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/task/${taskId}`
+        )
         .then((response) => {
           setStatus(response.data.status);
 
@@ -154,30 +139,15 @@ export const ConvertFileStep: FC<ConvertFileStepProps> = ({
         <div className="rounded-xl border border-gray-300 p-4 flex items-center gap-2">
           <LoadingCircleIcon className="animate-spin" />
           <span className="text-sm text-gray-700">
-            Compressing your file...
+            {status === 'UPLOADING'
+              ? `Uploading your file (${uploadProgress}%)... `
+              : `Converting your file...`}
           </span>
         </div>
       ) : (
-        <RadioGroup defaultValue={options[0].value}>
-          {options.map((option) => (
-            <Label
-              key={option.value}
-              htmlFor={option.value}
-              className="w-full p-4 flex gap-2 cursor-pointer bg-blue-25 border-2 border-blue-200 rounded-xl"
-            >
-              <RadioGroupItem value={option.value} id={option.value} />
-              <div className="flex flex-col gap-0.5">
-                <span className="text-sm leading-4 text-blue-800">
-                  {option.label}
-                </span>
-                <span className="text-sm text-blue-700">
-                  {option.description}
-                </span>
-              </div>
-            </Label>
-          ))}
-        </RadioGroup>
+        <CompressionOptionsRadioGroup />
       )}
+
       <div className="flex gap-3">
         <Button
           size="lg"
@@ -191,7 +161,7 @@ export const ConvertFileStep: FC<ConvertFileStepProps> = ({
         <Button
           size="lg"
           className="w-full font-semibold"
-          onClick={onCompress}
+          onClick={handleConvert}
           disabled={isConverting}
         >
           {isConverting ? (
