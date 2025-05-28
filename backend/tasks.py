@@ -2,7 +2,8 @@ from celery import Celery
 import httpx
 import uuid
 from botocore.exceptions import BotoCoreError, NoCredentialsError
-from config import settings, s3_client
+from config import settings
+from s3 import s3_client
 
 celery_app = Celery(
     "tasks", broker="redis://localhost:6379/0", backend="redis://localhost:6379/0"

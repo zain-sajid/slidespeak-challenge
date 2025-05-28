@@ -4,7 +4,8 @@ import uuid
 import httpx
 from botocore.exceptions import BotoCoreError, NoCredentialsError
 from tasks import celery_app, convert_and_upload
-from config import settings, s3_client
+from config import settings
+from s3 import s3_client
 from celery.result import AsyncResult
 
 app = FastAPI()
@@ -46,7 +47,8 @@ def get_task_result(task_id: str):
     if not result:
         raise HTTPException(status_code=404, detail="Task not found")
     if result.ready():
-        return {"status": result.status, "result": result.result}
+        return {"status": result.status, "result": str(result.result)}
+
     return {"status": result.status}
 
 
