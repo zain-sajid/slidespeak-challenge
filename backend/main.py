@@ -1,22 +1,12 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic_settings import BaseSettings, SettingsConfigDict
 import uuid
 import httpx
-import boto3
 from botocore.exceptions import BotoCoreError, NoCredentialsError
+from tasks import celery_app, convert_and_upload
+from config import settings, s3_client
+from celery.result import AsyncResult
 
-
-class Settings(BaseSettings):
-    aws_access_key_id: str
-    aws_secret_access_key: str
-    aws_region: str
-    aws_endpoint_url: str
-    aws_s3_bucket: str
-    model_config = SettingsConfigDict(env_file=".env")
-
-
-settings = Settings()
 app = FastAPI()
 
 app.add_middleware(
@@ -27,18 +17,33 @@ app.add_middleware(
 )
 
 
-s3_client = boto3.client(
-    "s3",
-    region_name=settings.aws_region,
-    endpoint_url=settings.aws_endpoint_url,
-    aws_access_key_id=settings.aws_access_key_id,
-    aws_secret_access_key=settings.aws_secret_access_key,
-)
-
-
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
+
+
+@app.post("/convert-task")
+async def convert_pptx_to_pdf(file: UploadFile = File(...)):
+    if not file.filename.endswith(".pptx"):
+        raise HTTPException(status_code=400, detail="Only .pptx files are supported")
+
+    try:
+        content = await file.read()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error reading file: {str(e)}")
+
+    # Start Celery task
+    task = convert_and_upload.delay(content, file.filename, file.content_type)
+
+    return {"message": "Task started", "task_id": task.id}
+
+
+@app.get("/task/{task_id}")
+def get_task_result(task_id: str):
+    result = AsyncResult(task_id, app=celery_app)
+    if result.ready():
+        return {"status": result.status, "result": result.result}
+    return {"status": result.status}
 
 
 @app.post("/convert")
