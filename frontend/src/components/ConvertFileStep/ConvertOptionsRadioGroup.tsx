@@ -3,13 +3,13 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const options = [
   {
-    value: 'high-compression',
-    label: 'High Compression',
-    description: 'Smallest file size, standard quality.',
+    value: 'pdf',
+    label: 'Convert to PDF',
+    description: 'Best quality, retains images and other assets.',
   },
 ];
 
-export const CompressionOptionsRadioGroup = () => {
+export const ConvertOptionsRadioGroup = () => {
   return (
     <RadioGroup defaultValue={options[0].value}>
       {options.map((option) => (

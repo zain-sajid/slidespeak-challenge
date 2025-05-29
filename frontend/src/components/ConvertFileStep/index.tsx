@@ -3,11 +3,10 @@ import { FC, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { formatFileSize } from '@/utils/file-size';
 import { LoadingIndicatorIcon } from '@/icons/LoadingIndicatorIcon';
-import { LoadingCircleIcon } from '@/icons/LoadingCircleIcon';
 import { useInterval } from 'usehooks-ts';
 import { useToast } from '@/hooks/use-toast';
 import { ConvertStatus, TaskResponse, UploadResponse } from '@/types';
-import { CompressionOptionsRadioGroup } from '@/components/ConvertFileStep/CompressionOptionsRadioGroup';
+import { ConvertOptionsRadioGroup } from '@/components/ConvertFileStep/ConvertOptionsRadioGroup';
 
 type ConvertFileStepProps = {
   file: File | null;
@@ -45,7 +44,7 @@ export const ConvertFileStep: FC<ConvertFileStepProps> = ({
 
     axios
       .post<UploadResponse>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/convert-task`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/convert`,
         formData,
         {
           onUploadProgress: (progressEvent) => {
@@ -84,7 +83,7 @@ export const ConvertFileStep: FC<ConvertFileStepProps> = ({
           } else if (response.data.status === 'FAILURE') {
             console.error(response.data.result);
             toast({
-              title: 'Failed to convert your file.',
+              title: 'Uh oh! Something went wrong.',
               description: 'Failed to convert your file.',
               variant: 'error',
             });
@@ -137,7 +136,7 @@ export const ConvertFileStep: FC<ConvertFileStepProps> = ({
 
       {isConverting ? (
         <div className="rounded-xl border border-gray-300 p-4 flex items-center gap-2">
-          <LoadingCircleIcon className="animate-spin" />
+          <div className="size-7 animate-spin-pretty rounded-full border-4 border-solid border-t-blue-500" />
           <span className="text-sm text-gray-700">
             {status === 'UPLOADING'
               ? `Uploading your file (${uploadProgress}%)... `
@@ -145,7 +144,7 @@ export const ConvertFileStep: FC<ConvertFileStepProps> = ({
           </span>
         </div>
       ) : (
-        <CompressionOptionsRadioGroup />
+        <ConvertOptionsRadioGroup />
       )}
 
       <div className="flex gap-3">
@@ -167,7 +166,7 @@ export const ConvertFileStep: FC<ConvertFileStepProps> = ({
           {isConverting ? (
             <LoadingIndicatorIcon className="animate-spin" />
           ) : (
-            'Compress'
+            'Convert'
           )}
         </Button>
       </div>

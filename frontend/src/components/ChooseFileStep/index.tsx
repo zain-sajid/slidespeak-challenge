@@ -3,14 +3,22 @@
 import { FC, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import UploadIcon from '@/icons/UploadIcon';
+import { useToast } from '@/hooks/use-toast';
 
 type ChooseFileStepProps = {
   onChooseFile: (file: File) => void;
 };
 
 export const ChooseFileStep: FC<ChooseFileStepProps> = ({ onChooseFile }) => {
+  const { toast } = useToast();
+
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length !== 1) {
+      toast({
+        title: 'Multiple files selected',
+        description: 'Please select a single file to convert',
+        variant: 'error',
+      });
       return;
     }
     onChooseFile(acceptedFiles[0]);
