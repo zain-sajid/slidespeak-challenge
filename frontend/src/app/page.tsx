@@ -1,6 +1,6 @@
 import { PowerPointToPdfConverter } from '@/components/PowerPointToPdfConverter';
 
-const Home = async () => (
+const Home = () => (
   <main className="w-full max-w-[420px]">
     <PowerPointToPdfConverter />
   </main>

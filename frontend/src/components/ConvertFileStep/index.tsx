@@ -129,8 +129,12 @@ export const ConvertFileStep: FC<ConvertFileStepProps> = ({
     <div className="p-6 flex flex-col gap-4 shadow-md rounded-2xl">
       <div className="flex flex-col gap-3">
         <div className="p-4 border border-gray-300 rounded-lg flex flex-col items-center gap-1">
-          <h1 className="font-semibold text-lg text-gray-800">{file.name}</h1>
-          <p className="text-sm text-gray-600">{formatFileSize(file.size)}</p>
+          <h1 className="font-semibold text-lg text-gray-800 line-clamp-2 text-center">
+            {file.name}
+          </h1>
+          <p className="text-sm text-gray-600  text-center">
+            {formatFileSize(file.size)}
+          </p>
         </div>
       </div>
 

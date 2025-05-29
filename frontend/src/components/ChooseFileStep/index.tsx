@@ -15,8 +15,11 @@ export const ChooseFileStep: FC<ChooseFileStepProps> = ({ onChooseFile }) => {
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length !== 1) {
       toast({
-        title: 'Multiple files selected',
-        description: 'Please select a single file to convert',
+        title:
+          acceptedFiles.length === 0
+            ? 'Only .pptx files are supported'
+            : 'Multiple files selected',
+        description: 'Please select a single .pptx file to convert',
         variant: 'error',
       });
       return;
