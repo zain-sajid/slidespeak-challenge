@@ -12,20 +12,23 @@ type ChooseFileStepProps = {
 export const ChooseFileStep: FC<ChooseFileStepProps> = ({ onChooseFile }) => {
   const { toast } = useToast();
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length !== 1) {
-      toast({
-        title:
-          acceptedFiles.length === 0
-            ? 'Only .pptx files are supported'
-            : 'Multiple files selected',
-        description: 'Please select a single .pptx file to convert',
-        variant: 'error',
-      });
-      return;
-    }
-    onChooseFile(acceptedFiles[0]);
-  }, [onChooseFile, toast]);
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      if (acceptedFiles.length !== 1) {
+        toast({
+          title:
+            acceptedFiles.length === 0
+              ? 'Only .pptx files are supported'
+              : 'Multiple files selected',
+          description: 'Please select a single .pptx file to convert',
+          variant: 'error',
+        });
+        return;
+      }
+      onChooseFile(acceptedFiles[0]);
+    },
+    [onChooseFile, toast]
+  );
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
