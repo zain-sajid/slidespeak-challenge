@@ -10,7 +10,8 @@ celery_app = Celery("tasks", broker=settings.redis_url, backend=settings.redis_u
 
 @celery_app.task(time_limit=200)
 def convert_and_upload(file_content: bytes, filename: str, content_type: str):
-    key = f"{uuid.uuid4()}.pdf"
+    # Using unique folders to avoid collisions but keep the same filename
+    key = f"pdfs/{uuid.uuid4()}/{filename}.pdf"
 
     files = {
         "file": (filename, file_content, content_type),

@@ -2,12 +2,13 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from tasks import celery_app, convert_and_upload
 from celery.result import AsyncResult
+from config import settings
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[settings.frontend_url],
     allow_methods=["POST", "GET"],
     allow_headers=["Content-Type"],
 )
@@ -53,4 +54,4 @@ def cancel_task(task_id: str):
     if not result:
         raise HTTPException(status_code=404, detail="Task not found")
     result.revoke(terminate=True, signal="SIGKILL")
-    return {"status": "CANCELLED", "task_id": task_id}
+    return {"status": "REVOKED", "task_id": task_id}
