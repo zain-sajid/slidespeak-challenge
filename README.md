@@ -112,7 +112,7 @@ pytest
 
 ### Backend
 
-- The current unoserver service can only process one document at a time which forces as to run Celery with concurrency = 1, we can add some form of load balancing to unoserver to process multiple documents or tasks at the same time
+- The current unoserver service can only process one document at a time which forces us to run Celery with `concurrency = 1`, we can add some form of load balancing to unoserver to process multiple documents or tasks at the same time
 - Add rate limiting for API endpoints
 - Add support for more document formats
 - Improve test cases
