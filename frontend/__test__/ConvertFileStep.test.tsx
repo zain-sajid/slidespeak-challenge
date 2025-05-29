@@ -6,7 +6,7 @@ jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('ConvertFileStep', () => {
-  const mockOnConvert = jest.fn();
+  const mockOnConvertComplete = jest.fn();
   const mockOnCancel = jest.fn();
 
   const dummyFile = new File(['test'], 'test.pptx', {
@@ -21,7 +21,7 @@ describe('ConvertFileStep', () => {
     render(
       <ConvertFileStep
         file={null}
-        onConvert={mockOnConvert}
+        onConvertComplete={mockOnConvertComplete}
         onCancel={mockOnCancel}
       />
     );
@@ -35,7 +35,7 @@ describe('ConvertFileStep', () => {
     render(
       <ConvertFileStep
         file={dummyFile}
-        onConvert={mockOnConvert}
+        onConvertComplete={mockOnConvertComplete}
         onCancel={mockOnCancel}
       />
     );
@@ -53,7 +53,7 @@ describe('ConvertFileStep', () => {
     render(
       <ConvertFileStep
         file={dummyFile}
-        onConvert={mockOnConvert}
+        onConvertComplete={mockOnConvertComplete}
         onCancel={mockOnCancel}
       />
     );

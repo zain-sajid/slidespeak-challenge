@@ -3,7 +3,7 @@ import { DownloadFileStep } from '@/components/DownloadFileStep';
 
 describe('DownloadFileStep', () => {
   const mockOnDownload = jest.fn();
-  const mockOnCancel = jest.fn();
+  const mockOnConvertAnother = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -11,7 +11,7 @@ describe('DownloadFileStep', () => {
 
   it('renders success message and buttons', () => {
     render(
-      <DownloadFileStep onDownload={mockOnDownload} onCancel={mockOnCancel} />
+      <DownloadFileStep onDownload={mockOnDownload} onConvertAnother={mockOnConvertAnother} />
     );
 
     expect(
@@ -25,18 +25,18 @@ describe('DownloadFileStep', () => {
     ).toBeInTheDocument();
   });
 
-  it('calls onCancel when "Convert another" is clicked', () => {
+  it('calls onConvertAnother when "Convert another" is clicked', () => {
     render(
-      <DownloadFileStep onDownload={mockOnDownload} onCancel={mockOnCancel} />
+      <DownloadFileStep onDownload={mockOnDownload} onConvertAnother={mockOnConvertAnother} />
     );
 
     fireEvent.click(screen.getByRole('button', { name: /convert another/i }));
-    expect(mockOnCancel).toHaveBeenCalledTimes(1);
+    expect(mockOnConvertAnother).toHaveBeenCalledTimes(1);
   });
 
   it('calls onDownload when "Download" is clicked', () => {
     render(
-      <DownloadFileStep onDownload={mockOnDownload} onCancel={mockOnCancel} />
+      <DownloadFileStep onDownload={mockOnDownload} onConvertAnother={mockOnConvertAnother} />
     );
 
     fireEvent.click(screen.getByRole('button', { name: /download/i }));
