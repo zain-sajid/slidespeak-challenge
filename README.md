@@ -1,57 +1,116 @@
-# SlideSpeak coding challenge: Build a PowerPoint to PDF marketing tool
+# SlideSpeak Challenge
 
-## The challenge!
+A full-stack application to convert PowerPoint documents to PDF format
 
-Build a front-end implementation as well as a back-end service to convert PowerPoint documents to PDF format. This
-should be done by implementing a simple **Next.js** front-end that posts a file to a **Python** server. You don’t have
-to do the converting logic yourself as you can use unoconv or unoserver to do this (you can see more about this in the
-acceptance criteria). The front-end is also already implemented in the /frontend folder. You only need to add the
-necessary logic to switch between the steps and convert the file via the API that you're going to build.
+## Tech Stack
 
-- Design: [https://www.figma.com/file/CRfT0MVMqIV8rAK6HgSnKA/SlideSpeak-Coding-Challenge?type=design&t=6m2fFDaRs72CowZH-6](https://www.figma.com/file/CRfT0MVMqIV8rAK6HgSnKA/SlideSpeak-Coding-Challenge?type=design&t=6m2fFDaRs72CowZH-6)
+### Frontend
 
-## Acceptance criteria
+- [Next.js](https://nextjs.org/docs)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS](https://v3.tailwindcss.com/)
+- [shadcn/ui](https://ui.shadcn.com/)
+- [Bun](https://bun.sh/)
+- [Jest](https://jestjs.io/)
 
-### Back-end API
+### Backend
 
-- Should be implemented in Python.
-- Converting PowerPoints to PDF can be done with `unoconv` or `unoserver` via Docker if you want to be fancy 😀. You
-  don’t need to implement the converting logic yourself.
-  - [How to use unoserver via docker](https://gist.github.com/kgoedecke/44955d0b0b1ed4112bcfd3e237e135c0), this will
-    create an API that you can use based on [this](https://github.com/libreofficedocker/unoserver-rest-api)
-    documentation.
-    - Using unoserver is nice-to-have (but the preferred way), if you find unoconv easier use it instead
-- Under the the hood the API:
+- [Python](https://www.python.org/)
+- [FastAPI](https://fastapi.tiangolo.com/)
+- [Unoserver](https://github.com/libreofficedocker/unoserver-rest-api) - a packaged unoserver with REST APIs via Docker
+- [Celery](https://docs.celeryq.dev/en/latest/index.html) - for queuing tasks
+- [Redis](https://redis.io/) - a broker and database for Celery tasks
+- [AWS S3](https://aws.amazon.com/s3/)
+- [Docker](https://www.docker.com/)
 
-  1. Convert the attached file to PDF
-  2. Upload the PowerPoint and PDF file to Amazon S3
-     via [boto3](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html)
-  3. Create a presigned URL for the user to download
+## Prerequisites
 
-     [https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-presigned-urls.html](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-presigned-urls.html)
+Before you begin, ensure you have the following installed:
 
-     [https://medium.com/@aidan.hallett/securing-aws-s3-uploads-using-presigned-urls-aa821c13ae8d](https://medium.com/@aidan.hallett/securing-aws-s3-uploads-using-presigned-urls-aa821c13ae8d)
+- Node.js
+- Python 3.8+
+- Docker
+- Bun (for package management)
 
-  4. Return the presigned S3 url to the client which allows the user to download the file (by opening the url in new
-     tab)
+## Getting Started
 
-- Queuing to process multiple requests at a time
+### Backend
 
-### Front-end app
+1. Navigate to the backend directory:
 
-- The front-end should in terms of UX work similarly
-  to [https://app.slidespeak.co/powerpoint-optimizer](https://app.slidespeak.co/powerpoint-optimizer)
+   ```bash
+   cd backend
+   ```
 
-## General Requirements:
+2. Build and start all services using docker-compose
 
-- Use conventional commit message style: https://www.conventionalcommits.org/en/v1.0.0/
-- Lint your code
-- Keep commits clean
+   ```bash
+   docker-compose up --build
+   ```
 
-## Nice to haves / tips
+The backend server will be available at `http://localhost:8000`
 
-- Uses unoserver to convert PowerPoint to PDF via docker compose
-- The logic of the front-end ideally should not rely on useEffect too much since it can be difficult to track what is
-  happening
-- Tests
-- API documentation
+### Frontend
+
+1. Update environment variables
+
+```bash
+cp .env.example .env.local
+```
+
+2. Navigate to the frontend directory:
+
+   ```bash
+   cd frontend
+   ```
+
+3. Install dependencies:
+
+   ```bash
+   bun install
+   ```
+
+4. Run the development server:
+
+   ```bash
+   bun run dev
+
+   # OR
+
+   npm run dev
+   ```
+
+The frontend application will be available at `http://localhost:3000`
+
+## Testing
+
+### Frontend
+
+Run the frontend tests using Jest:
+
+```bash
+cd frontend
+npm run test
+```
+
+### Backend
+
+Run the backend tests using pytest:
+
+```bash
+cd backend
+pytest
+```
+
+## Improvements
+
+### Backend
+
+- Currently Celery runs with concurrency=1, allow it to handle multiple tasks concurrently
+- Add rate limiting for API endpoints
+- Add support for more document formats
+- Improve test coverage
+
+### Frontend
+
+- Improve test coverage with end-to-end and integration testing
