@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     aws_region: str
     aws_endpoint_url: str
     aws_s3_bucket: str
+    redis_url: str
+    unoserver_url: str
     model_config = SettingsConfigDict(env_file=".env")
 
 

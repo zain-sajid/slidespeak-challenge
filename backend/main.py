@@ -1,11 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import uuid
-import httpx
-from botocore.exceptions import BotoCoreError, NoCredentialsError
 from tasks import celery_app, convert_and_upload
-from config import settings
-from s3 import s3_client
 from celery.result import AsyncResult
 
 app = FastAPI()
@@ -20,10 +15,10 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Health Check"}
 
 
-@app.post("/convert-task")
+@app.post("/convert")
 async def convert_pptx_to_pdf(file: UploadFile = File(...)):
     if not file.filename.endswith(".pptx"):
         raise HTTPException(status_code=400, detail="Only .pptx files are supported")
@@ -59,58 +54,3 @@ def cancel_task(task_id: str):
         raise HTTPException(status_code=404, detail="Task not found")
     result.revoke(terminate=True, signal="SIGKILL")
     return {"status": "CANCELLED", "task_id": task_id}
-
-
-@app.post("/convert")
-async def convert_pptx_to_pdf(file: UploadFile = File(...)):
-    if not file.filename.endswith(".pptx"):
-        raise HTTPException(status_code=400, detail="Only .pptx files are supported")
-
-    key = f"{uuid.uuid4()}.pdf"
-
-    try:
-        content = await file.read()
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error reading the uploaded file: {str(e)}"
-        )
-
-    try:
-        files = {
-            "file": (file.filename, content, file.content_type),
-            "convert-to": (None, "pdf"),
-        }
-
-        async with httpx.AsyncClient() as client:
-            response = await client.post("http://127.0.0.1:2004/request", files=files)
-    except httpx.RequestError as e:
-        raise HTTPException(
-            status_code=502, detail=f"Error converting the file: {str(e)}"
-        )
-
-    if response.status_code != 200:
-        raise HTTPException(status_code=500, detail="Failed to convert file")
-
-    try:
-        pdfContent = response.content
-        s3_client.put_object(
-            Bucket=settings.aws_s3_bucket,
-            Key=key,
-            Body=pdfContent,
-            ContentType="application/pdf",
-        )
-    except (BotoCoreError, NoCredentialsError) as e:
-        raise HTTPException(status_code=500, detail=f"Failed to upload PDF: {str(e)}")
-
-    try:
-        url = s3_client.generate_presigned_url(
-            "get_object",
-            Params={"Bucket": settings.aws_s3_bucket, "Key": key},
-            ExpiresIn=3600,
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to generate presigned URL: {str(e)}"
-        )
-
-    return {"message": "PPTX converted to PDF", "url": url}

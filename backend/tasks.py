@@ -5,14 +5,7 @@ from botocore.exceptions import BotoCoreError, NoCredentialsError
 from config import settings
 from s3 import s3_client
 
-celery_app = Celery(
-    "tasks", broker="redis://localhost:6379/0", backend="redis://localhost:6379/0"
-)
-
-
-@celery_app.task
-def add(x, y):
-    return x + y
+celery_app = Celery("tasks", broker=settings.redis_url, backend=settings.redis_url)
 
 
 @celery_app.task(time_limit=150)
@@ -26,8 +19,9 @@ def convert_and_upload(file_content: bytes, filename: str, content_type: str):
 
     try:
         timeout = httpx.Timeout(100)
+        print(f"{settings.unoserver_url}/request")
         response = httpx.post(
-            "http://127.0.0.1:2004/request", files=files, timeout=timeout
+            f"{settings.unoserver_url}/request", files=files, timeout=timeout
         )
     except httpx.RequestError as e:
         raise Exception(f"Error converting the file: {str(e)}")
