@@ -14,7 +14,6 @@ services:
     environment:
       - REDIS_URL=redis://redis:6379
       - UNOSERVER_URL=http://unoserver:2004
-      - FRONTEND_URL=http://localhost:3000
     restart: unless-stopped
 
   celery:
@@ -30,7 +29,6 @@ services:
     environment:
       - REDIS_URL=redis://redis:6379
       - UNOSERVER_URL=http://unoserver:2004
-      - FRONTEND_URL=http://localhost:3000
     restart: unless-stopped
   redis:
     image: redis:8.0.1
