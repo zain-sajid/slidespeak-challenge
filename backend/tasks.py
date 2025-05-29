@@ -8,7 +8,7 @@ from aws import s3_client
 celery_app = Celery("tasks", broker=settings.redis_url, backend=settings.redis_url)
 
 
-@celery_app.task(time_limit=150)
+@celery_app.task(time_limit=200)
 def convert_and_upload(file_content: bytes, filename: str, content_type: str):
     key = f"{uuid.uuid4()}.pdf"
 
