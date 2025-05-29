@@ -12,39 +12,44 @@ export const PowerPointToPdfConverter = () => {
   const [file, setFile] = useState<File | null>(null);
   const [url, setUrl] = useState<string | null>(null);
 
-  const onChooseFile = (file: File) => {
+  const handleChooseFile = (file: File) => {
     setFile(file);
     setCurrentStep('CONVERT');
   };
 
-  const onConvert = (url: string) => {
+  const handleConvertComplete = (url: string) => {
     setUrl(url);
     setCurrentStep('DOWNLOAD');
   };
 
-  const onDownload = () => {
+  const handleDownload = () => {
     if (url) {
       window.open(url, '_blank');
     }
   };
 
-  const onCancel = () => {
+  const handleReset = () => {
     setFile(null);
     setCurrentStep('CHOOSE_FILE');
   };
 
   switch (currentStep) {
     case 'CHOOSE_FILE':
-      return <ChooseFileStep onChooseFile={onChooseFile} />;
+      return <ChooseFileStep onChooseFile={handleChooseFile} />;
     case 'CONVERT':
       return (
         <ConvertFileStep
           file={file}
-          onCancel={onCancel}
-          onConvert={onConvert}
+          onCancel={handleReset}
+          onConvertComplete={handleConvertComplete}
         />
       );
     case 'DOWNLOAD':
-      return <DownloadFileStep onCancel={onCancel} onDownload={onDownload} />;
+      return (
+        <DownloadFileStep
+          onConvertAnother={handleReset}
+          onDownload={handleDownload}
+        />
+      );
   }
 };

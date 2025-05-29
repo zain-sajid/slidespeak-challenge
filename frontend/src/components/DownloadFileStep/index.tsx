@@ -5,12 +5,12 @@ import { SuccessCircleIcon } from '@/icons/SuccessCircleIcon';
 
 type DownloadFileStepProps = {
   onDownload: () => void;
-  onCancel: () => void;
+  onConvertAnother: () => void;
 };
 
 export const DownloadFileStep: FC<DownloadFileStepProps> = ({
   onDownload,
-  onCancel,
+  onConvertAnother,
 }) => {
   return (
     <div className="p-6 flex flex-col gap-4 shadow-md rounded-2xl">
@@ -31,7 +31,7 @@ export const DownloadFileStep: FC<DownloadFileStepProps> = ({
           size="lg"
           variant="outline"
           className="w-full font-semibold"
-          onClick={onCancel}
+          onClick={onConvertAnother}
         >
           Convert another
         </Button>

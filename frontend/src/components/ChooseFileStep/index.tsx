@@ -25,7 +25,7 @@ export const ChooseFileStep: FC<ChooseFileStepProps> = ({ onChooseFile }) => {
       return;
     }
     onChooseFile(acceptedFiles[0]);
-  }, []);
+  }, [onChooseFile, toast]);
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,

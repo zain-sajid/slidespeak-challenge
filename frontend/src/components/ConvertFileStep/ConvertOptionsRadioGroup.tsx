@@ -1,6 +1,7 @@
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
+// We can fetch these options from the backend in the future
 const options = [
   {
     value: 'pdf',
@@ -9,6 +10,7 @@ const options = [
   },
 ];
 
+// Choose a RadioGroup component here so that we can add the functionality select from different options
 export const ConvertOptionsRadioGroup = () => {
   return (
     <RadioGroup defaultValue={options[0].value}>

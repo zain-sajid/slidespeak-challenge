@@ -10,13 +10,13 @@ import { ConvertOptionsRadioGroup } from '@/components/ConvertFileStep/ConvertOp
 
 type ConvertFileStepProps = {
   file: File | null;
-  onConvert: (url: string) => void;
   onCancel: () => void;
+  onConvertComplete: (url: string) => void;
 };
 
 export const ConvertFileStep: FC<ConvertFileStepProps> = ({
   file,
-  onConvert,
+  onConvertComplete,
   onCancel,
 }) => {
   const [status, setStatus] = useState<ConvertStatus | null>(null);
@@ -79,7 +79,7 @@ export const ConvertFileStep: FC<ConvertFileStepProps> = ({
           setStatus(response.data.status);
 
           if (response.data.status === 'SUCCESS') {
-            onConvert(response.data.result);
+            onConvertComplete(response.data.result);
           } else if (response.data.status === 'FAILURE') {
             console.error(response.data.result);
             toast({
