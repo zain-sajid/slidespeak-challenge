@@ -42,7 +42,13 @@ Before you begin, ensure you have the following installed:
    cd backend
    ```
 
-2. Build and start all services using docker-compose
+2. Update environment variables
+
+```bash
+cp .env.example .env
+```
+
+3. Build and start all services using docker-compose
 
    ```bash
    docker-compose up --build
@@ -52,17 +58,17 @@ The backend server will be available at `http://localhost:8000`
 
 ### Frontend
 
-1. Update environment variables
-
-```bash
-cp .env.example .env.local
-```
-
-2. Navigate to the frontend directory:
+1. Navigate to the frontend directory:
 
    ```bash
    cd frontend
    ```
+
+2. Update environment variables
+
+```bash
+cp .env.example .env.local
+```
 
 3. Install dependencies:
 
