@@ -38,9 +38,9 @@ Before you begin, ensure you have the following installed:
 
 1. Navigate to the backend directory:
 
-   ```bash
-   cd backend
-   ```
+```bash
+cd backend
+```
 
 2. Update environment variables
 
@@ -50,8 +50,8 @@ cp .env.example .env
 
 3. Build and start all services using docker-compose
 
-   ```bash
-   docker-compose up --build
+```bash
+docker-compose up --build
    ```
 
 The backend server will be available at `http://localhost:8000`
@@ -60,9 +60,9 @@ The backend server will be available at `http://localhost:8000`
 
 1. Navigate to the frontend directory:
 
-   ```bash
-   cd frontend
-   ```
+```bash
+cd frontend
+```
 
 2. Update environment variables
 
@@ -72,19 +72,19 @@ cp .env.example .env.local
 
 3. Install dependencies:
 
-   ```bash
-   bun install
-   ```
+```bash
+bun install
+```
 
 4. Run the development server:
 
-   ```bash
-   bun run dev
+```bash
+bun run dev
 
-   # OR
+# OR
 
-   npm run dev
-   ```
+npm run dev
+```
 
 The frontend application will be available at `http://localhost:3000`
 
@@ -115,8 +115,8 @@ pytest
 - Currently Celery runs with concurrency=1, allow it to handle multiple tasks concurrently
 - Add rate limiting for API endpoints
 - Add support for more document formats
-- Improve test coverage
+- Improve test cases
 
 ### Frontend
 
-- Improve test coverage with end-to-end and integration testing
+- Improve test cases with end-to-end and integration testing
