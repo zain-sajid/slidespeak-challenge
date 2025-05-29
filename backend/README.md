@@ -177,7 +177,7 @@ This API relies on:
 1. **Upload File**: POST to `/convert` with a .pptx file
 2. **Get Task ID**: Save the returned `task_id` from the response
 3. **Poll Status**: GET `/task/{task_id}` to check conversion progress
-4. **Get Result**: When status is "SUCCESS", the result contains the converted file details
+4. **Get Result**: When status is "SUCCESS", the result contains the url to the converted pdf
 5. **Cancel if Needed**: DELETE `/cancel-task/{task_id}` to stop processing
 
 ## Rate Limiting & File Size
